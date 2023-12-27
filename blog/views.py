@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponseRedirect
+from django.shortcuts import render,HttpResponseRedirect,redirect
 from .forms import sigupform,loginform,postform
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
@@ -29,19 +29,18 @@ def dashboard(request):
 #logout
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/login/')
 
 #SIGUP
 def user_sigup(request):
     if request.method == "POST":
-     form = sigupform(request.POST)
-     if form.is_valid():
-      messages.success(request,'congrulations!!! you have become an Author')
-      user = form.save()
-      group = Group.objects.get(name='Author')
-      user.groups.add(group)
+        form = sigupform(request.POST)
+        if form.is_valid():
+            messages.success(request,'congrulations!!! you have become an Author')
+            user = form.save()
+            return redirect('/login/')
     else:
-     form = sigupform()
+        form = sigupform()
     return render(request,'blog/signup.html',{'form':form})
 #login
 def user_login(request):
@@ -70,6 +69,7 @@ def add_post(request):
           pst = post(title=title,description=description)
           pst.save() 
           messages.success(request,'Add successfully!!!!') 
+          return redirect('/dashboard/')
          form = postform()     
      else:
       form = postform()           
@@ -81,20 +81,20 @@ def add_post(request):
     
  
     # update post
-def update_post(request,id):
-   if request.user.is_authenticated:
-     if request.method == 'POST':
-        pi=post.objects.get(pk=id)
-        form=postform(request.POST,instance=pi)
-        if form.is_valid():
-         messages.success(request,'update successfully!!!!') 
-         form.save()
-     else:
-      pi=post.objects.get(pk=id)
-      form=postform(instance=pi)         
-     return render(request,'blog/updatepost.html',{'form':form}) 
-   else: 
-    return HttpResponseRedirect('/login/') 
+def update_post(request,id):  # sourcery skip: last-if-guard
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect('/login/')
+    if request.method == 'POST':
+       pi=post.objects.get(pk=id)
+       form=postform(request.POST,instance=pi)
+       if form.is_valid():
+        messages.success(request,'update successfully!!!!') 
+        form.save()
+        return redirect('/dashboard/')
+    else:
+     pi=post.objects.get(pk=id)
+     form=postform(instance=pi)
+    return render(request,'blog/updatepost.html',{'form':form}) 
     
        # delete  post
 def delete_post(request,id):

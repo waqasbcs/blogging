@@ -11,7 +11,7 @@ class sigupform(UserCreationForm):
     password2 = forms.CharField(label='Confirm Password (again)',widget=forms.PasswordInput(attrs={'class':'form-control'}))
     class Meta:
      model = User
-     fields = ['username','first_name','last_name','email']
+     fields = ['first_name','last_name','username','email']
      labels = {'email':'Email','first_name':'First_Name','last_name':'Last_Name'}
      widgets = {'username':forms.TextInput(attrs={'class':'form-control'}),
                 'first_name':forms.TextInput(attrs={'class':'form-control'}),
